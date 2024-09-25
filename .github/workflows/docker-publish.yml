@@ -19,7 +19,7 @@ jobs:
 
     container: ${{ matrix.docker_tag }}:latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Install dependencies
       run: |
@@ -42,7 +42,7 @@ jobs:
 
     - name: Upload artifacts
       if: ${{ success() }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: hello-${{ steps.slug.outputs.sha8 }}-${{ steps.docker_tag.outputs.sha8 }}
         path: |
