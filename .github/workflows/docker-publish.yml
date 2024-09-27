@@ -23,10 +23,8 @@ jobs:
 
     - name: Install dependencies
       run: |
-        apt-get update
-        apt-get install -y build-essential git bash cmake gcc-8 g++-8
-        update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100
-        update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 100
+        apk update
+        apk add build-base git bash cmake gcc g++ # GCC and G++ will pull the latest versions
 
     - name: Compile project
       run: |
