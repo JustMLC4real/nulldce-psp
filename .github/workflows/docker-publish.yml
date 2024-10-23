@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install dependencies
+      - name: Install essential dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y cmake build-essential git wget
@@ -33,24 +33,21 @@ jobs:
           cd psptoolchain
           ./toolchain.sh
         env:
-          PSPDEV: ${{ runner.workspace }}/pspdev
-          PATH: ${{ runner.workspace }}/pspdev/bin:$PATH
-
-      - name: Clone NullDCe PSP repository
-        run: |
-          git clone https://github.com/PSP-Archive/nulldce-psp.git
-          cd nulldce-psp
+          PSPDEV: $HOME/pspdev
+          PATH: $HOME/pspdev/bin:$PATH
 
       - name: Configure build
         run: |
-          export PSPDEV=${{ runner.workspace }}/pspdev
+          export PSPDEV=$HOME/pspdev
           export PATH=$PSPDEV/bin:$PATH
+          cd nulldce-psp
           cmake .
 
       - name: Build project
         run: |
-          export PSPDEV=${{ runner.workspace }}/pspdev
+          export PSPDEV=$HOME/pspdev
           export PATH=$PSPDEV/bin:$PATH
+          cd nulldce-psp
           make
 
       - name: Upload build artifacts
