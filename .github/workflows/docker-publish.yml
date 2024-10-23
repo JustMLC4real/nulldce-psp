@@ -26,7 +26,7 @@ jobs:
 
     - name: Install dependencies inside Docker container
       run: |
-        apt-get update && apt-get install -y cmake build-essential git
+        apk add --no-cache build-base git cmake  # Using apk for Alpine Linux
 
     - name: Compile project
       run: |
