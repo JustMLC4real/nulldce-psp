@@ -49,7 +49,7 @@ struct sh4_opcodelistentry
 	u64 fallbacks;
 	void Dissasemble(char* strout,u32 pc , u16 params) const
 	{
-		sprintf(strout,"%s:%08X:%04X",diss,pc,params);
+		sprintf(strout,"%s:%08lX:%04X", diss, (unsigned long)pc, (unsigned long)params);
 	}
 
 	INLINE bool SetPC() const
