@@ -15,15 +15,18 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        
+
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake build-essential
-          
+          sudo apt-get install -y cmake build-essential git wget
+
       - name: Install PSP toolchain
         run: |
-          sudo apt-get install -y pspdev
+          sudo apt-get install -y python3
+          git clone https://github.com/pspdev/psptoolchain.git
+          cd psptoolchain
+          ./toolchain.sh
           
       - name: Clone NullDCe PSP repository
         run: |
