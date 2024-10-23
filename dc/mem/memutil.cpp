@@ -114,7 +114,7 @@ bool SaveSh4FlashromToFile(wchar *szFile)
 	
 	fseek(fd, 0, SEEK_SET);	// to beginning of file
 
-	fwrite(&flash_b[0], 1,FLASH_SIZE, fd);
+	fwrite(&flash_b[(u32)0], 1, FLASH_SIZE, fd);
 
 	printf("SaveSh4FlashromToFile: Saved flash file \"%s\"\n",szFile);
 	fclose(fd);
