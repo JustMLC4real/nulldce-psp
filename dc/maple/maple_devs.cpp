@@ -5,7 +5,7 @@
 #include "maple_cfg.h"
 #include "../zlib/zlib.h"
 
-#include "pspDmac.h"
+#include "../include/pspdmac.h"
 
 #include <time.h>
 
