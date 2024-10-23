@@ -103,7 +103,7 @@ CFLAGS += -Wall -mno-check-zero-division
 CFLAGS +=  -fno-use-cxa-atexit -flive-range-shrinkage -fsplit-loops -funswitch-loops -funsafe-math-optimizations -fassociative-math -freorder-blocks-and-partition -fira-region=all -fivopts -frename-registers -fno-strict-aliasing -fsingle-precision-constant -fno-zero-initialized-in-bss -fmodulo-sched-allow-regmoves -fmodulo-sched -fgcse-sm -fomit-frame-pointer -fmerge-all-constants -ffast-math -funroll-loops 
 CFLAGS += -DRELEASE
 #CFLAGS += -save-temps
-CXXFLAGS = -fno-exceptions -fno-rtti -D _PSP
+CXXFLAGS = -I./psp/include -fno-exceptions -fno-rtti -D _PSP
 ASFLAGS = -c -x assembler-with-cpp
 
 EXTRA_TARGETS = EBOOT.PBP
