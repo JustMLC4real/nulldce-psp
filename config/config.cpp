@@ -441,7 +441,7 @@ s32 cfgLoadInt(const wchar * Section, const wchar * Key,s32 Default)
 void cfgSaveInt(const wchar * Section, const wchar * Key, s32 Int)
 {
 	wchar tmp[32];
-	sprintf(tmp,"%d", Int);
+	sprintf(tmp, "%ld", (long)Int);
 	cfgSaveStr(Section,Key,tmp);
 }
 void cfgSetVitual(const wchar * Section, const wchar * Key, const wchar * String)
