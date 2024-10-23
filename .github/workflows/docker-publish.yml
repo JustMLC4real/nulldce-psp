@@ -1,48 +1,46 @@
-name: Ce
+name: Build NullDCe PSP
 
 on:
   push:
-    branches: 
-      - '*'
-    tags:
-      - v*
+    branches:
+      - main
   pull_request:
-  repository_dispatch:
-    types: [run_build]
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        docker_tag: [fjtrujy/pspdev]
 
-    container: ${{ matrix.docker_tag }}:latest
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential
+          
+      - name: Install PSP toolchain
+        run: |
+          sudo apt-get install -y pspdev
+          
+      - name: Clone NullDCe PSP repository
+        run: |
+          git clone https://github.com/PSP-Archive/nulldce-psp.git
+          cd nulldce-psp
 
-    - name: Install dependencies
-      run: |
-        apk update
-        apk add build-base git bash cmake gcc g++ # GCC and G++ will pull the latest versions
+      - name: Configure build
+        run: |
+          cmake .
 
-    - name: Compile project
-      run: |
-        cd ./psp
-        make clean
-        make -j$(nproc)  # Compile using all available CPU cores
+      - name: Build project
+        run: |
+          make
 
-    - name: Get short SHA
-      id: slug
-      run: echo "sha8=$(echo ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_ENV
-    
-    - name: Sanitized Docker Tag
-      id: docker_tag
-      run: echo "docker_tag=$(echo ${{ matrix.docker_tag }} | sed s:/:__:g)" >> $GITHUB_ENV
-
-    - name: Upload artifacts
-      if: ${{ success() }}
-      uses: actions/upload-artifact@v3
-      with:
-        name: hello-${{ env.sha8 }}-${{ env.docker_tag }}
-        path: ./psp/EBOOT.PBP
+      - name: Upload build artifacts
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: NullDCe-PSP-Build
+          path: nulldce-psp/build/
