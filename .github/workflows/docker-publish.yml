@@ -21,13 +21,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake build-essential git wget
 
+      - name: Set up PSPDEV environment variable
+        run: |
+          export PSPDEV=$HOME/pspdev
+          export PATH=$PSPDEV/bin:$PATH
+          mkdir -p $PSPDEV
+
       - name: Install PSP toolchain
         run: |
-          sudo apt-get install -y python3
           git clone https://github.com/pspdev/psptoolchain.git
           cd psptoolchain
           ./toolchain.sh
-          
+        env:
+          PSPDEV: ${{ runner.workspace }}/pspdev
+          PATH: ${{ runner.workspace }}/pspdev/bin:$PATH
+
       - name: Clone NullDCe PSP repository
         run: |
           git clone https://github.com/PSP-Archive/nulldce-psp.git
@@ -35,10 +43,14 @@ jobs:
 
       - name: Configure build
         run: |
+          export PSPDEV=${{ runner.workspace }}/pspdev
+          export PATH=$PSPDEV/bin:$PATH
           cmake .
 
       - name: Build project
         run: |
+          export PSPDEV=${{ runner.workspace }}/pspdev
+          export PATH=$PSPDEV/bin:$PATH
           make
 
       - name: Upload build artifacts
