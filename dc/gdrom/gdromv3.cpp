@@ -11,7 +11,7 @@
 
 #include "dc/sh4/sh4_sched.h"
 
-#include "pspDmac.h"
+#include "../include/pspdmac.h"
 
 
 signed int sns_asc = 0;
