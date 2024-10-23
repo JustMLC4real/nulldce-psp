@@ -1,51 +1,10 @@
-name: CI
-
-on:
-  push:
-    branches: 
-      - '*'   # Trigger on any branch
-    tags:
-      - v*    # Trigger on version tags
-  pull_request:
-  repository_dispatch:
-    types: [run_build]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        docker_tag: [fjtrujy/pspdev]   # Use the PSP dev Docker image
-
-    container:
-      image: ${{ matrix.docker_tag }}:latest  # Use the latest tag for the Docker image
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2       # Checkout repository
-
-    - name: Install dependencies inside Docker container
-      run: |
-        apt-get update && apt-get install -y cmake build-essential git
-
-    - name: Compile project
-      run: |
-        cd ./psp
-        make clean                    # Clean any previous builds
-        make                          # Compile the project
-
-    - name: Get short SHA for the commit
-      id: slug
-      run: echo "::set-output name=sha8::$(echo ${GITHUB_SHA} | cut -c1-8)"
-
-    - name: Sanitize Docker Tag
-      id: docker_tag
-      run: echo "::set-output name=sha8::$(echo ${{matrix.docker_tag}} | sed s:/:__:g)"
-
-    - name: Upload artifacts
-      if: ${{ success() }}             # Upload artifact only if the build is successful
-      uses: actions/upload-artifact@v2
-      with:
-        name: EBOOT-${{ steps.slug.outputs.sha8 }}-${{ steps.docker_tag.outputs.sha8 }}
-        path: |
-          ./psp/EBOOT.PBP              # Path to your final build artifact
+Current runner version: '2.320.0'
+Operating System
+Runner Image
+Runner Image Provisioner
+GITHUB_TOKEN Permissions
+Secret source: Actions
+Prepare workflow directory
+Prepare all required actions
+Getting action download info
+Error: This request has been automatically failed because it uses a deprecated version of `actions/upload-artifact: v2`. Learn more: https://github.blog/changelog/2024-02-13-deprecation-notice-v1-and-v2-of-the-artifact-actions/
