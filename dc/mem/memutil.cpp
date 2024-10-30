@@ -2,21 +2,20 @@
 #include "memutil.h"
 #include "sh4_mem.h"
 
-// *FIXME* ENDIAN
-u32 LoadFileToSh4Mem(u32 offset, wchar* file) {
-    FILE *fd = fopen(file, "rb");
+u32 LoadFileToSh4Mem(u32 offset, wchar_t* file) {
+    FILE *fd = _wfopen(file, L"rb");
     if (fd == NULL) {
-        printf("LoadFileToSh4Mem: can't load file \"%ls\" to memory, file not found\n", file);
+        wprintf(L"LoadFileToSh4Mem: can't load file \"%ls\" to memory, file not found\n", file);
         return 0;
     }
 
     u32 e_ident;
     fread(&e_ident, 1, 4, fd);
-    fseek(fd, SEEK_SET, 0);
+    fseek(fd, 0, SEEK_SET);
 
     if (0x464C457F == e_ident) {
         fclose(fd);
-        printf("!\tERROR: Loading elf is not supported (%ls)\n", file);
+        wprintf(L"!\tERROR: Loading elf is not supported (%ls)\n", file);
         return 0;
     } else {
         int toff = offset;
@@ -29,15 +28,15 @@ u32 LoadFileToSh4Mem(u32 offset, wchar* file) {
         fclose(fd);
         toff += size;
 
-        printf("LoadFileToSh4Mem: loaded file \"%ls\" to {SysMem[%x]-SysMem[%x]}\nLoadFileToSh4Mem: file size : %d bytes\n", file, offset, toff - 1, toff - offset);
+        wprintf(L"LoadFileToSh4Mem: loaded file \"%ls\" to {SysMem[%x]-SysMem[%x]}\n"
+                L"LoadFileToSh4Mem: file size : %d bytes\n", file, offset, toff - 1, toff - offset);
         return 1;
     }
 }
 
-u32 LoadBinfileToSh4Mem(u32 offset, wchar* file) {
-    u8 CheckStr[8] = {0x7, 0xd0, 0x8, 0xd1, 0x17, 0x10, 0x5, 0xdf}; // String for checking if a binary file has an inbuilt ip.bin
-    u32 rv = 0;
-    rv = LoadFileToSh4Mem(0x10000, file);
+u32 LoadBinfileToSh4Mem(u32 offset, wchar_t* file) {
+    u8 CheckStr[8] = {0x7, 0xd0, 0x8, 0xd1, 0x17, 0x10, 0x5, 0xdf};
+    u32 rv = LoadFileToSh4Mem(0x10000, file);
 
     for (int i = 0; i < 8; i++) {
         if (ReadMem8(0x8C010000 + i + 0x300) != CheckStr[i])
@@ -46,19 +45,19 @@ u32 LoadBinfileToSh4Mem(u32 offset, wchar* file) {
     return LoadFileToSh4Mem(0x8000, file);
 }
 
-bool LoadFileToSh4Bootrom(wchar *szFile) {
-    FILE *fd = fopen(szFile, "rb");
+bool LoadFileToSh4Bootrom(wchar_t *szFile) {
+    FILE *fd = _wfopen(szFile, L"rb");
     if (fd == NULL) {
-        printf("LoadFileToSh4Bootrom: can't load file \"%ls\", file not found\n", szFile);
+        wprintf(L"LoadFileToSh4Bootrom: can't load file \"%ls\", file not found\n", szFile);
         return false;
     }
-    fseek(fd, 0, SEEK_END); // to end of file
-    int flen = ftell(fd);   // tell file position (size)
-    fseek(fd, 0, SEEK_SET); // to beginning of file
+    fseek(fd, 0, SEEK_END);
+    int flen = ftell(fd);
+    fseek(fd, 0, SEEK_SET);
 
 #ifndef BUILD_DEV_UNIT
     if (flen > (BIOS_SIZE)) {
-        printf("LoadFileToSh4Bootrom: can't load file \"%ls\", Too Large! size(%d bytes)\n", szFile, flen);
+        wprintf(L"LoadFileToSh4Bootrom: can't load file \"%ls\", Too Large! size(%d bytes)\n", szFile, flen);
         fclose(fd);
         return false;
     }
@@ -67,47 +66,45 @@ bool LoadFileToSh4Bootrom(wchar *szFile) {
 #endif
 
     size_t rd = fread(&bios_b[0], 1, flen, fd);
-    printf("LoadFileToSh4Bootrom: loaded file \"%ls\", size : %d bytes\n", szFile, rd);
+    wprintf(L"LoadFileToSh4Bootrom: loaded file \"%ls\", size : %zu bytes\n", szFile, rd);
     fclose(fd);
     return true;
 }
 
-bool LoadFileToSh4Flashrom(wchar *szFile) {
-    FILE *fd = fopen(szFile, "rb");
+bool LoadFileToSh4Flashrom(wchar_t *szFile) {
+    FILE *fd = _wfopen(szFile, L"rb");
     if (fd == NULL) {
-        printf("LoadFileToSh4Flashrom: can't load file \"%ls\", file not found\n", szFile);
+        wprintf(L"LoadFileToSh4Flashrom: can't load file \"%ls\", file not found\n", szFile);
         return false;
     }
-    fseek(fd, 0, SEEK_END); // to end of file
-    int flen = ftell(fd);   // tell file position (size)
-    fseek(fd, 0, SEEK_SET); // to beginning of file
+    fseek(fd, 0, SEEK_END);
+    int flen = ftell(fd);
+    fseek(fd, 0, SEEK_SET);
 
     if (flen > (FLASH_SIZE)) {
-        printf("LoadFileToSh4Flashrom: can't load file \"%ls\", Too Large! size(%d bytes)\n", szFile, flen);
+        wprintf(L"LoadFileToSh4Flashrom: can't load file \"%ls\", Too Large! size(%d bytes)\n", szFile, flen);
         fclose(fd);
         return false;
     }
 
-    // Access underlying data using indexing
     size_t rb = fread(&flash_b[0], 1, flen, fd);
-    printf("LoadFileToSh4Flashrom: loaded file \"%ls\", size: %d bytes\n", szFile, rb);
+    wprintf(L"LoadFileToSh4Flashrom: loaded file \"%ls\", size: %zu bytes\n", szFile, rb);
     fclose(fd);
     return true;
 }
 
-bool SaveSh4FlashromToFile(wchar *szFile) {
-    FILE *fd = fopen(szFile, "wb");
+bool SaveSh4FlashromToFile(wchar_t *szFile) {
+    FILE *fd = _wfopen(szFile, L"wb");
     if (fd == NULL) {
-        printf("SaveSh4FlashromToFile: can't open file \"%ls\"\n", szFile);
+        wprintf(L"SaveSh4FlashromToFile: can't open file \"%ls\"\n", szFile);
         return false;
     }
 
-    // Access underlying data using indexing
     size_t written = fwrite(&flash_b[0], 1, FLASH_SIZE, fd);
     if (written != FLASH_SIZE) {
-        printf("Error writing to file \"%ls\": Only %zu bytes written out of %d\n", szFile, written, FLASH_SIZE);
+        wprintf(L"Error writing to file \"%ls\": Only %zu bytes written out of %d\n", szFile, written, FLASH_SIZE);
     } else {
-        printf("SaveSh4FlashromToFile: Saved flash file \"%ls\"\n", szFile);
+        wprintf(L"SaveSh4FlashromToFile: Saved flash file \"%ls\"\n", szFile);
     }
 
     fclose(fd);
@@ -120,14 +117,14 @@ void AddHook(u32 Addr, u16 Opcode) {
     u32 Offs = (Opcode != 0x000B) ? 2 : 0;
     static const u16 RtsNOP[2] = {0x000B, 0x0009};
 
-    if (Opcode != 0x000B) // RTS
+    if (Opcode != 0x000B)
         WriteMem16_nommu(Addr, Opcode);
 
     WriteMem16_nommu(Addr + Offs, RtsNOP[0]);
     WriteMem16_nommu(Addr + Offs + 2, RtsNOP[1]);
 }
 
-#define SYSINFO_OPCODE    ((u16)0x30F1) // SYSINFO - 0011 0000 1111 0001
+#define SYSINFO_OPCODE    ((u16)0x30F1)
 #define dc_bios_syscall_system       0x8C0000B0
 #define dc_bios_syscall_font         0x8C0000B4
 #define dc_bios_syscall_flashrom     0x8C0000B8
@@ -138,30 +135,14 @@ void AddHook(u32 Addr, u16 Opcode) {
 u32 EnabledPatches = 0;
 
 void LoadSyscallHooks() {
-    // Skip em all :)
-    // if (EnabledPatches & patch_syscall_system)
     AddHook(ReadMem32(dc_bios_syscall_system), 0x000B);
-
-    // if (EnabledPatches & patch_syscall_font)
     AddHook(ReadMem32_nommu(dc_bios_syscall_font),  0x000B);
-
-    // if (EnabledPatches & patch_syscall_flashrom)
     AddHook(ReadMem32_nommu(dc_bios_syscall_flashrom), 0x000B);
-
-    // if (EnabledPatches & patch_syscall_GDrom_misc)
     AddHook(ReadMem32_nommu(dc_bios_syscall_GDrom_misc), 0x000B);
-
-    // if (EnabledPatches & patch_syscall_GDrom_HLE)
-    AddHook(0x1000, GDROM_OPCODE); // gdrom call, reads / checks status
-
-    // if (EnabledPatches & patch_syscall_GDrom_HLE)
-    AddHook(ReadMem32_nommu(dc_bios_syscall_resets_Misc), 0x000B);
-
-    // if (EnabledPatches & patch_resets_Misc)
+    AddHook(0x1000, GDROM_OPCODE);
     AddHook(ReadMem32_nommu(dc_bios_syscall_resets_Misc), 0x000B);
 }
 
-void SetPatches(/*u32 Value,u32 Mask*/) {
-    // EnabledPatches = (EnabledPatches & (~Mask)) | Value;
+void SetPatches() {
     LoadSyscallHooks();
 }
